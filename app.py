@@ -65,17 +65,40 @@ with st.form("prediction_form"):
 
     if submitted:
         mix_design_params = {
-            'wc': wc,
-            'CR': CR,
-            'SR': SR,
-            'CC': CC,
-            'CFA': CFA,
-            'CCA': CCA,
-            'sfc': sfc,
-            'CS': CS,
-            'TC': TC
+            'wc': wc, 'CR': CR, 'SR': SR, 'CC': CC, 
+            'CFA': CFA, 'CCA': CCA, 'sfc': sfc, 'CS': CS, 'TC': TC
         }
+        
         predicted_fc = predict_compressive_strength_app(mix_design_params)
+        
+        # --- Visualizing the Result ---
         st.success(f"Predicted Compressive Strength: **{predicted_fc:.2f} MPa**")
+        
+        st.subheader("Mix Design Profile")
+        
+        # Normalize values slightly for the radar chart scale (0 to 1) 
+        # based on the min/max you set in the number inputs
+        categories = list(mix_design_params.keys())
+        values = list(mix_design_params.values())
+        
+        # Simple normalization for visualization purposes
+        # (This scales the inputs so they fit on one circular graph)
+        max_vals = [0.8, 500, 30, 700, 1500, 1800, 25, 365, 100]
+        norm_values = [v / m for v, m in zip(values, max_vals)]
 
-st.markdown("--- Source: [Your Project Name/Link] ---")
+        fig = go.Figure()
+
+        fig.add_trace(go.Scatterpolar(
+            r=norm_values + [norm_values[0]],
+            theta=categories + [categories[0]],
+            fill='toself',
+            name='Current Mix'
+        ))
+
+        fig.update_layout(
+            polar=dict(radialaxis=dict(visible=True, range=[0, 1])),
+            showlegend=False,
+            title="Relative Parameter Distribution"
+        )
+
+        st.plotly_chart(fig)
