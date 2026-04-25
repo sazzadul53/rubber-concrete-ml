@@ -1,9 +1,4 @@
-# Example content for requirements.txt
-# Copy this into a file named 'requirements.txt'
-
-print("streamlit")
-print("pandas")
-print("numpy")
-print("scikit-learn") # For joblib and potentially other sklearn components
-print("xgboost") # If your best model is XGBoost
-# You might need other libraries depending on your specific app, e.g., matplotlib, seaborn, shap
+streamlit
+joblib
+numpy
+scikit-learn
