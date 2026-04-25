@@ -2,8 +2,6 @@
 # CELL 13.2 — Streamlit App for Deployment
 # ─────────────────────────────────────────────────────────────────
 
-!pip install streamlit -q
-
 import streamlit as st
 import joblib
 import numpy as np
