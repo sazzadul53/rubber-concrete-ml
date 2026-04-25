@@ -65,63 +65,32 @@ with st.form("prediction_form"):
     submitted = st.form_submit_button("Predict Compressive Strength")
 
     if submitted:
-    mix_design_params = {
-        'wc': wc, 'CR': CR, 'SR': SR, 'CC': CC, 
-        'CFA': CFA, 'CCA': CCA, 'sfc': sfc, 'CS': CS, 'TC': TC
-    }
-    
-    predicted_fc = predict_compressive_strength_app(mix_design_params)
-    
-    # Display the primary result
-    st.success(f"Predicted Compressive Strength: **{predicted_fc:.2f} MPa**")
-    
-    # Create two columns for charts
-    col_chart1, col_chart2 = st.columns(2)
-    
-    with col_chart1:
-        st.subheader("Mix Design Profile")
-        # Normalize for radar chart (Value / Max possible in UI)
-        categories = list(mix_design_params.keys())
-        values = list(mix_design_params.values())
-        max_vals = [0.8, 500, 30, 700, 1500, 1800, 25, 365, 100]
-        norm_values = [v / m for v, m in zip(values, max_vals)]
-
-        fig_radar = go.Figure()
-        fig_radar.add_trace(go.Scatterpolar(
-            r=norm_values + [norm_values[0]],
-            theta=categories + [categories[0]],
-            fill='toself',
-            line=dict(color='#2E86C1')
-        ))
-        fig_radar.update_layout(
-            polar=dict(radialaxis=dict(visible=True, range=[0, 1])),
-            showlegend=False,
-            margin=dict(l=40, r=40, t=40, b=40)
-        )
-        st.plotly_chart(fig_radar, use_container_width=True)
-
-    with col_chart2:
-        st.subheader("Parameter Contribution")
-        # Horizontal Bar Chart to show raw input values
-        fig_bar = px.bar(
-            x=values,
-            y=categories,
-            orientation='h',
-            color=values,
-            color_continuous_scale='Viridis'
-        )
-        fig_bar.update_layout(showlegend=False, xaxis_title="Input Value")
-        st.plotly_chart(fig_bar, use_container_width=True)
-
-    # Optional: Strength Trend Analysis (Varying w/c ratio)
-    st.subheader("Sensitivity Analysis: Effect of w/c on Strength")
-    wc_range = np.linspace(0.2, 0.8, 20)
-    strengths = []
-    for w in wc_range:
-        temp_params = mix_design_params.copy()
-        temp_params['wc'] = w
-        strengths.append(predict_compressive_strength_app(temp_params))
-    
-    fig_line = px.line(x=wc_range, y=strengths, labels={'x': 'w/c Ratio', 'y': 'Strength (MPa)'})
-    fig_line.add_vline(x=wc, line_dash="dash", line_color="red", annotation_text="Current Input")
-    st.plotly_chart(fig_line, use_container_width=True)
+        # These lines MUST be indented by 4 spaces (or 1 tab)
+        mix_design_params = {
+            'wc': wc,
+            'CR': CR,
+            'SR': SR,
+            'CC': CC,
+            'CFA': CFA,
+            'CCA': CCA,
+            'sfc': sfc,
+            'CS': CS,
+            'TC': TC
+        }
+        
+        predicted_fc = predict_compressive_strength_app(mix_design_params)
+        
+        # Display Success Message
+        st.success(f"Predicted Compressive Strength: **{predicted_fc:.2f} MPa**")
+        
+        # --- Add the Graphs Here ---
+        st.subheader("Analysis Visualizations")
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            # Code for your Radar Chart or Bar Chart
+            pass 
+            
+        with col2:
+            # Code for your Sensitivity Analysis
+            pass
