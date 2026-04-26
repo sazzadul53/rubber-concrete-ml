@@ -30,22 +30,30 @@ def predict_compressive_strength_app(mix_design_params: dict) -> float:
 st.set_page_config(page_title="Rubberized Concrete Predictor", layout="wide")
 st.title("🧱 Rubberized Concrete Strength Analysis")
 
-# Sidebar for inputs to keep the main area clean for graphs
-st.sidebar.header("Input Mix Parameters")
-with st.sidebar.form("prediction_form"):
-    wc = st.number_input('w/c Ratio', 0.2, 0.8, 0.4)
-    CR = st.number_input('Coarse Rubber (kg/m³)', 0.0, 500.0, 50.0)
-    SR = st.number_input('Fine Rubber (kg/m³)', 0.0, 30.0, 5.0)
-    CC = st.number_input('Cement Content (kg/m³)', 200.0, 700.0, 400.0)
-    CFA = st.number_input('Fine Aggregate (kg/m³)', 0.0, 1500.0, 700.0)
-    CCA = st.number_input('Coarse Aggregate (kg/m³)', 0.0, 1800.0, 1100.0)
-    sfc = st.number_input('Steel Fibre (%)', 0.0, 25.0, 1.0)
-    CS = st.number_input('Curing Age (days)', 1.0, 365.0, 28.0)
-    TC = st.number_input('Curing Temp (°C)', 0.0, 100.0, 20.0)
+st.header("Input Mix Parameters")
+
+# Main page form using columns for a clean layout
+with st.form("prediction_form"):
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        wc = st.number_input('w/c Ratio', 0.2, 0.8, 0.4)
+        CR = st.number_input('Coarse Rubber (kg/m³)', 0.0, 500.0, 50.0)
+        SR = st.number_input('Fine Rubber (kg/m³)', 0.0, 30.0, 5.0)
+
+    with col2:
+        CC = st.number_input('Cement Content (kg/m³)', 200.0, 700.0, 400.0)
+        CFA = st.number_input('Fine Aggregate (kg/m³)', 0.0, 1500.0, 700.0)
+        CCA = st.number_input('Coarse Aggregate (kg/m³)', 0.0, 1800.0, 1100.0)
+
+    with col3:
+        sfc = st.number_input('Steel Fibre (%)', 0.0, 25.0, 1.0)
+        CS = st.number_input('Curing Age (days)', 1.0, 365.0, 28.0)
+        TC = st.number_input('Curing Temp (°C)', 0.0, 100.0, 20.0)
     
     submitted = st.form_submit_button("Analyze Mix Design")
 
-# Main Page Logic
+# --- Results & Visualization ---
 if submitted:
     params = {'wc': wc, 'CR': CR, 'SR': SR, 'CC': CC, 'CFA': CFA, 'CCA': CCA, 'sfc': sfc, 'CS': CS, 'TC': TC}
     prediction = predict_compressive_strength_app(params)
@@ -53,24 +61,39 @@ if submitted:
     # 1. Metric Display
     st.metric(label="Predicted Compressive Strength", value=f"{prediction:.2f} MPa")
     
-    # 2. Radar Chart (Mix Profile)
-    st.subheader("Mix Design Profile")
-    categories = list(params.keys())
-    values = list(params.values())
-    # Normalizing values for the radar chart scale
-    max_vals = [0.8, 500, 30, 700, 1500, 1800, 25, 365, 100]
-    norm_values = [v / m for v, m in zip(values, max_vals)]
+    st.divider() # Adds a nice horizontal line to separate inputs from graphs
     
-    fig_radar = go.Figure(data=go.Scatterpolar(r=norm_values + [norm_values[0]], theta=categories + [categories[0]], fill='toself'))
-    fig_radar.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 1])), showlegend=False)
-    st.plotly_chart(fig_radar, use_container_width=True)
+    # 2. Create columns for the graphs so they sit side-by-side
+    graph_col1, graph_col2 = st.columns(2)
+    
+    with graph_col1:
+        st.subheader("Mix Design Profile")
+        categories = list(params.keys())
+        values = list(params.values())
+        
+        # Normalizing values for the radar chart scale
+        max_vals = [0.8, 500, 30, 700, 1500, 1800, 25, 365, 100]
+        norm_values = [v / m for v, m in zip(values, max_vals)]
+        
+        fig_radar = go.Figure(data=go.Scatterpolar(
+            r=norm_values + [norm_values[0]], 
+            theta=categories + [categories[0]], 
+            fill='toself',
+            line_color='#2E86C1'
+        ))
+        fig_radar.update_layout(
+            polar=dict(radialaxis=dict(visible=True, range=[0, 1])), 
+            showlegend=False,
+            margin=dict(t=40, b=40, l=40, r=40)
+        )
+        st.plotly_chart(fig_radar, use_container_width=True)
 
-    # 3. Sensitivity Analysis (How Strength changes with w/c)
-    st.subheader("Sensitivity Analysis: w/c vs Strength")
-    wc_range = np.linspace(0.2, 0.8, 20)
-    trends = [predict_compressive_strength_app({**params, 'wc': w}) for w in wc_range]
-    fig_line = px.line(x=wc_range, y=trends, labels={'x': 'Water-Cement Ratio', 'y': 'Strength (MPa)'})
-    fig_line.add_vline(x=wc, line_dash="dash", line_color="red")
-    st.plotly_chart(fig_line, use_container_width=True)
-else:
-    st.info("Adjust the parameters in the sidebar and click 'Analyze Mix Design' to generate the report.")
+    with graph_col2:
+        st.subheader("Sensitivity Analysis: w/c vs Strength")
+        wc_range = np.linspace(0.2, 0.8, 20)
+        trends = [predict_compressive_strength_app({**params, 'wc': w}) for w in wc_range]
+        
+        fig_line = px.line(x=wc_range, y=trends, labels={'x': 'Water-Cement Ratio', 'y': 'Strength (MPa)'})
+        fig_line.add_vline(x=wc, line_dash="dash", line_color="red", annotation_text="Current Mix")
+        fig_line.update_layout(margin=dict(t=40, b=40, l=40, r=40))
+        st.plotly_chart(fig_line, use_container_width=True)
