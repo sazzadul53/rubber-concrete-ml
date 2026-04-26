@@ -104,7 +104,8 @@ if submitted:
             margin=dict(t=40, b=40, l=80, r=80) 
         )
         st.plotly_chart(fig_radar, use_container_width=True)
-     with graph_col2:
+
+    with graph_col2:
         st.subheader("Sensitivity Analysis: w/c vs Strength")
         wc_range = np.linspace(0.2, 0.8, 20)
         trends = [predict_compressive_strength_app({**params, 'wc': w}) for w in wc_range]
