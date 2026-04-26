@@ -68,7 +68,22 @@ if submitted:
     
     with graph_col1:
         st.subheader("Mix Design Profile")
-        categories = list(params.keys())
+        
+        # 1. Map the short variable names to full presentation labels
+        display_names = {
+            'wc': 'w/c Ratio',
+            'CR': 'Coarse Rubber (CR)',
+            'SR': 'Fine Rubber (SR)',
+            'CC': 'Cement Content (CC)',
+            'CFA': 'Fine Aggregate (CFA)',
+            'CCA': 'Coarse Aggregate (CCA)',
+            'sfc': 'Steel Fibre (sfc)',
+            'CS': 'Curing Age (CS)',
+            'TC': 'Curing Temp (TC)'
+        }
+        
+        # 2. Apply the full names to the chart categories
+        categories = [display_names[k] for k in params.keys()]
         values = list(params.values())
         
         # Normalizing values for the radar chart scale
@@ -81,19 +96,11 @@ if submitted:
             fill='toself',
             line_color='#2E86C1'
         ))
+        
+        # 3. Increased left/right margins (l=80, r=80) so the longer labels don't get cut off
         fig_radar.update_layout(
             polar=dict(radialaxis=dict(visible=True, range=[0, 1])), 
             showlegend=False,
-            margin=dict(t=40, b=40, l=40, r=40)
+            margin=dict(t=40, b=40, l=80, r=80) 
         )
         st.plotly_chart(fig_radar, use_container_width=True)
-
-    with graph_col2:
-        st.subheader("Sensitivity Analysis: w/c vs Strength")
-        wc_range = np.linspace(0.2, 0.8, 20)
-        trends = [predict_compressive_strength_app({**params, 'wc': w}) for w in wc_range]
-        
-        fig_line = px.line(x=wc_range, y=trends, labels={'x': 'Water-Cement Ratio', 'y': 'Strength (MPa)'})
-        fig_line.add_vline(x=wc, line_dash="dash", line_color="red", annotation_text="Current Mix")
-        fig_line.update_layout(margin=dict(t=40, b=40, l=40, r=40))
-        st.plotly_chart(fig_line, use_container_width=True)
