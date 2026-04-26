@@ -103,7 +103,7 @@ if submitted:
             showlegend=False,
             margin=dict(t=40, b=40, l=80, r=80) 
         )
-        st.plotly_chart(fig_radar, use_container_width=True)
+        st.plotly_chart(fig_radar, use_container_width=True, config={'staticPlot': True})
 
     with graph_col2:
         st.subheader("Sensitivity Analysis: w/c vs Strength")
@@ -113,4 +113,4 @@ if submitted:
         fig_line = px.line(x=wc_range, y=trends, labels={'x': 'Water-Cement Ratio', 'y': 'Strength (MPa)'})
         fig_line.add_vline(x=wc, line_dash="dash", line_color="red", annotation_text="Current Mix")
         fig_line.update_layout(margin=dict(t=40, b=40, l=40, r=40))
-        st.plotly_chart(fig_line, use_container_width=True)
+        st.plotly_chart(fig_line, use_container_width=True, config={'staticPlot': True})
